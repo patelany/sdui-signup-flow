@@ -39,11 +39,6 @@ without redeploying the client.
 3. `renderer.renderComponent()` looks up the component in the registry and renders it
 4. Components are “dumb” building blocks that receive `value`, `onChange`, and `error`
 
-## Running locally
-```bash
-npm install
-npm run dev
-
 ## Production Architecture
 
 ### Frontend
@@ -70,4 +65,9 @@ npm run dev
   - drop-offs by page
   - avg time per page
   - most common validation errors
+
+## Running locally
+```bash
+npm install
+npm run dev
 
