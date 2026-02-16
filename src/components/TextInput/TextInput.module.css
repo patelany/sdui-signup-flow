@@ -1,0 +1,23 @@
+.field {
+  margin: 0 0 12px;
+}
+
+.label {
+  display: block;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.error {
+  margin-top: 6px;
+  color: #b00020;
+  font-size: 13px;
+}

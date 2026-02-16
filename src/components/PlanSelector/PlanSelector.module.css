@@ -1,0 +1,45 @@
+.fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0 0 12px;
+}
+
+.legend {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.grid {
+  display: grid;
+  gap: 10px;
+}
+
+.card {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid #bbb;
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.cardBody {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.title {
+  font-weight: 700;
+}
+
+.price {
+  opacity: 0.9;
+}
+
+.error {
+  margin-top: 6px;
+  color: #b00020;
+  font-size: 13px;
+}
