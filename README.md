@@ -99,3 +99,32 @@ Captures analytics events such:
 - field_change
 - experiment_exposure
 - flow_complete
+
+
+## Production Architecture
+
+### Frontend
+- **S3 + CloudFront** hosts the static React app globally.
+
+### Flow Config Service
+- `GET /flow?userId=...`
+- **API Gateway → Lambda**
+- Lambda returns a typed `SDUIFlow` JSON (same schema as `src/sdui/schema.ts`).
+- store configs by `flowId + version` in DynamoDB.
+
+### Analytics Pipeline (replaces server.ts)
+- `POST /track`
+- **API Gateway → Lambda**
+- Lambda validates/enriches events and stores them.
+- Storage options:
+  - **DynamoDB** 
+
+### Insights
+- `GET /insights`
+- **API Gateway → Lambda**
+- Lambda returns aggregated metrics:
+  - drop-offs by page
+  - avg time per page
+  - most common validation errors
+
+
