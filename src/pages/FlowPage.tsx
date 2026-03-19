@@ -3,6 +3,7 @@ import type { SDUIFlow, SDUIPage } from '../sdui/schema';
 import {fetchFlow, type Variant} from '../sdui/mockServer';
 import { renderComponent, type FormErrors, type FormState } from '../sdui/renderer';
 import { bucket } from '../sdui/experiment';
+import { fetchFlowFromApi } from '../sdui/api';
 
 function validatePage(page: SDUIPage, form: FormState): FormErrors{
     const errors: FormErrors = {};
@@ -41,29 +42,58 @@ export default function FlowPage(){
     const prevPageIdRef = useRef<string | null>(null);
 
     //send events from client
-    async function track(event: string, payload?: Record<string, unknown>){
+    // async function track(event: string, payload?: Record<string, unknown>){
 
-        const body = {
-            userId: getUserId(),
-            event, 
-            flowId: flow?.id, 
-            flowVersion: flow?.version,
-            variant,
-            pageId: effectivePageId,
-            ts: new Date().toISOString(),
-            ...(payload ?? {}),
-        };
+    //     const body = {
+    //         userId: getUserId(),
+    //         event, 
+    //         flowId: flow?.id, 
+    //         flowVersion: flow?.version,
+    //         variant,
+    //         pageId: effectivePageId,
+    //         ts: new Date().toISOString(),
+    //         ...(payload ?? {}),
+    //     };
 
-        try {
-            await fetch('http://localhost:4000/track', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(body),
-                keepalive: true,
-            });
-        } catch {
-            console.log('[track-fallback', body);
-        }
+    //     try {
+    //         await fetch('http://localhost:4000/track', {
+    //             method: 'POST',
+    //             headers: {'Content-Type': 'application/json'},
+    //             body: JSON.stringify(body),
+    //             keepalive: true,
+    //         });
+    //     } catch {
+    //         console.log('[track-fallback', body);
+    //     }
+    // }
+    async function track(event: string, payload?: Record<string, unknown>) {
+  //skip flow-dependent ones until flow exists
+    if (!flow && event !== 'experiment_exposure') {
+        return;
+    }
+
+    const body = {
+        sessionId: getSessionId(),
+        userId: getUserId(),
+        flowId: flow?.id,
+        flowVersion: flow?.version,
+        variant,
+        pageId: effectivePageId,
+        event,
+        ts: new Date().toISOString(),
+        payload: payload ?? {},
+    };
+
+    try {
+        await fetch(`${import.meta.env.VITE_API_BASE}/track`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        keepalive: true,
+        });
+    } catch {
+        console.log('[track-fallback]', body);
+    }
     }
 
     function getUserId(){
@@ -76,6 +106,18 @@ export default function FlowPage(){
         localStorage.setItem(key, id);
 
         return id; 
+    }
+
+    function getSessionId() {
+    const key = 'sdui_session_id';
+    const existing = sessionStorage.getItem(key);
+
+    if (existing) return existing;
+
+    const id = crypto.randomUUID();
+    sessionStorage.setItem(key, id);
+
+    return id;
     }
 
     //assign variant
@@ -152,12 +194,12 @@ export default function FlowPage(){
 
     useEffect(()=>{
         let mounted = true;
-        fetchFlow(variant).then((f)=>{
-            if(!mounted) return; 
-            setFlow(f);
-            setPageIndex(0);
-            setForm({});
-            setErrors({});
+        fetchFlowFromApi(getUserId(), variant).then((data) => {
+        if (!mounted) return;
+        setFlow(data.flow);
+        setPageIndex(0);
+        setForm({});
+        setErrors({});
         });
         return () =>{
             mounted = false;
